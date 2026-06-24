@@ -1,0 +1,43 @@
+{
+  "packageId": "app.vercel.audioeightlemon.twa",
+  "host": "audio-eight-lemon.vercel.app",
+  "name": "Audiobook",
+  "launcherName": "Audiobook",
+  "display": "fullscreen",
+  "themeColor": "#4FD8EB",
+  "themeColorDark": "#000000",
+  "navigationColor": "#0A0A0A",
+  "navigationColorDark": "#0A0A0A",
+  "navigationDividerColor": "#000000",
+  "navigationDividerColorDark": "#000000",
+  "backgroundColor": "#0A0A0A",
+  "enableNotifications": false,
+  "startUrl": "/",
+  "iconUrl": "http://localhost:3000/book-logo.svg",
+  "maskableIconUrl": "http://localhost:3000/book-logo.svg",
+  "splashScreenFadeOutDuration": 300,
+  "signingKey": {
+    "path": "C:\\Users\\sanka\\audiobook\\android-twa\\android.keystore",
+    "alias": "android"
+  },
+  "appVersionName": "1.0.1",
+  "appVersionCode": 3,
+  "shortcuts": [],
+  "generatorApp": "bubblewrap-cli",
+  "webManifestUrl": "https://audio-eight-lemon.vercel.app/manifest.json",
+  "fallbackType": "customtabs",
+  "features": {},
+  "alphaDependencies": {
+    "enabled": false
+  },
+  "enableSiteSettingsShortcut": true,
+  "isChromeOSOnly": false,
+  "isMetaQuest": false,
+  "minSdkVersion": 21,
+  "orientation": "default",
+  "fingerprints": [],
+  "additionalTrustedOrigins": [],
+  "retainedBundles": [],
+  "displayOverride": [],
+  "appVersion": "1.0.1"
+}

@@ -1,0 +1,10 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "app.vercel.audioeightlemon.twa",
+    "sha256_cert_fingerprints": [
+      "6E:B8:90:E6:0D:5D:D7:6F:9F:5E:08:BA:DC:6B:36:85:67:14:49:57:AD:18:09:9A:83:26:B8:E7:46:DA:D2:DE"
+    ]
+  }
+}]
