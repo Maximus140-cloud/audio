@@ -260,7 +260,7 @@ export default function Home() {
         
       };
 
-      const CONCURRENCY = 100; // Increased concurrency since Edge TTS limits are bypassed
+      const CONCURRENCY = 20; // Lowered to 20 to avoid Vercel 10-second 504 timeouts
       for (let i = 0; i < book.chunks.length; i += CONCURRENCY) {
         if (hasError) break;
         const batch = [];
