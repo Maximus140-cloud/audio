@@ -92,20 +92,22 @@ export default function Library({
                   {book.title}
                 </h3>
                 
-                <div className="mt-auto pt-4 space-y-2">
-                  <div className="flex justify-between text-xs text-on-surface-variant font-medium">
-                    <span>{Math.round(progress)}% completed</span>
-                    <span>{book.chunks.length} chunks</span>
-                  </div>
-                  <div className="w-full bg-surface-variant rounded-full h-1.5 overflow-hidden">
-                    <div 
-                      className="bg-primary h-1.5 rounded-full transition-all duration-500" 
-                      style={{ width: `${progress}%` }}
-                    />
+                <div className="mt-auto pt-4 space-y-4">
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-xs text-on-surface-variant font-medium">
+                      <span>{Math.round(progress)}% completed</span>
+                      <span>{book.chunks.length} chunks</span>
+                    </div>
+                    <div className="w-full bg-surface-variant rounded-full h-1.5 overflow-hidden">
+                      <div 
+                        className="bg-primary h-1.5 rounded-full transition-all duration-500" 
+                        style={{ width: `${progress}%` }}
+                      />
+                    </div>
                   </div>
 
                   {isDownloading && (
-                    <div className="pt-2 animate-fade-in">
+                    <div className="animate-fade-in">
                       <div className="flex justify-between text-xs text-primary font-medium mb-1.5">
                         <span className="flex items-center gap-1">
                           <RefreshCw className="animate-spin" size={12} /> Downloading
@@ -120,19 +122,19 @@ export default function Library({
                       </div>
                     </div>
                   )}
-                </div>
-
-                <div className="absolute bottom-6 right-6 flex gap-2">
-                  <button
-                    onClick={(e) => handleDownload(e, book)}
-                    disabled={isDownloading}
-                    className="p-3 bg-surface text-on-surface rounded-full shadow-lg shadow-black/5 hover:scale-110 transition-transform opacity-100 md:opacity-0 md:group-hover:opacity-100"
-                    title="Download for offline playback"
-                  >
-                    {isDownloading ? <RefreshCw className="animate-spin text-primary" size={20} /> : <Download size={20} />}
-                  </button>
-                  <div className="p-3 bg-primary text-on-primary rounded-full shadow-lg shadow-primary/30 group-hover:scale-110 transition-transform">
-                    <Play size={20} className="ml-0.5" />
+                  
+                  <div className="flex justify-end gap-3 pt-2">
+                    <button
+                      onClick={(e) => handleDownload(e, book)}
+                      disabled={isDownloading}
+                      className="p-3 bg-surface text-on-surface rounded-full shadow-sm hover:scale-110 transition-transform opacity-100 md:opacity-0 md:group-hover:opacity-100"
+                      title="Download for offline playback"
+                    >
+                      {isDownloading ? <RefreshCw className="animate-spin text-primary" size={20} /> : <Download size={20} />}
+                    </button>
+                    <div className="p-3 bg-primary text-on-primary rounded-full shadow-lg shadow-primary/30 group-hover:scale-110 transition-transform flex items-center justify-center">
+                      <Play size={20} className="ml-0.5" />
+                    </div>
                   </div>
                 </div>
               </div>

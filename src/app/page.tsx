@@ -39,8 +39,17 @@ export default function Home() {
   useEffect(() => {
     loadData();
     
-    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    const savedTheme = localStorage.getItem("theme");
+    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    
+    if (savedTheme === "dark" || (!savedTheme && prefersDark)) {
       setIsDarkMode(true);
+      document.documentElement.classList.add("dark");
+      document.documentElement.style.colorScheme = "dark";
+    } else {
+      setIsDarkMode(false);
+      document.documentElement.classList.remove("dark");
+      document.documentElement.style.colorScheme = "light";
     }
 
     const savedSettings = localStorage.getItem("voiceSettings");
@@ -59,9 +68,11 @@ export default function Home() {
     if (newTheme) {
       document.documentElement.classList.add("dark");
       document.documentElement.style.colorScheme = "dark";
+      localStorage.setItem("theme", "dark");
     } else {
       document.documentElement.classList.remove("dark");
       document.documentElement.style.colorScheme = "light";
+      localStorage.setItem("theme", "light");
     }
   };
 

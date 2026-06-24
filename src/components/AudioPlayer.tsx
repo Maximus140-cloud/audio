@@ -290,8 +290,16 @@ export default function AudioPlayer({
   return (
     <div className="relative flex w-full max-w-5xl mx-auto my-8 gap-6 h-[80vh]">
       
+      {/* Sidebar Backdrop (Mobile Only) */}
+      {isSidebarOpen && (
+        <div 
+          className="absolute inset-0 z-10 bg-black/50 backdrop-blur-sm lg:hidden rounded-3xl"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+      
       {/* TOC & Bookmarks Sidebar */}
-      <div className={`absolute lg:relative z-20 flex-shrink-0 w-80 h-full bg-surface glass-panel rounded-3xl p-6 overflow-y-auto transition-transform duration-300 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-[120%] lg:translate-x-0'}`}>
+      <div className={`absolute lg:relative z-20 flex-shrink-0 w-4/5 max-w-[320px] lg:w-80 h-full bg-surface glass-panel lg:rounded-3xl p-6 overflow-y-auto shadow-2xl lg:shadow-none transition-transform duration-300 left-0 top-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-bold text-on-surface">Contents</h2>
           <button onClick={() => setIsSidebarOpen(false)} className="lg:hidden p-2 text-on-surface-variant">

@@ -25,31 +25,29 @@
   --glass-border: rgba(0, 0, 0, 0.05);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    /* Material 3 Dark Theme Tokens */
-    --md-sys-color-primary: #4fd8eb;
-    --md-sys-color-on-primary: #00363d;
-    --md-sys-color-primary-container: #004f58;
-    --md-sys-color-on-primary-container: #97f0ff;
-    
-    --md-sys-color-secondary: #b1cbd0;
-    --md-sys-color-on-secondary: #1c3438;
-    --md-sys-color-secondary-container: #334b4f;
-    --md-sys-color-on-secondary-container: #cde7ec;
-    
-    --md-sys-color-background: #191c1d;
-    --md-sys-color-on-background: #e1e3e3;
-    --md-sys-color-surface: #191c1d;
-    --md-sys-color-on-surface: #e1e3e3;
-    --md-sys-color-surface-variant: #3f484a;
-    --md-sys-color-on-surface-variant: #bfc8ca;
-    --md-sys-color-outline: #899294;
-    
-    /* Glassmorphism overlays */
-    --glass-surface: rgba(25, 28, 29, 0.7);
-    --glass-border: rgba(255, 255, 255, 0.1);
-  }
+.dark {
+  /* Material 3 Dark Theme Tokens */
+  --md-sys-color-primary: #4fd8eb;
+  --md-sys-color-on-primary: #00363d;
+  --md-sys-color-primary-container: #004f58;
+  --md-sys-color-on-primary-container: #97f0ff;
+  
+  --md-sys-color-secondary: #b1cbd0;
+  --md-sys-color-on-secondary: #1c3438;
+  --md-sys-color-secondary-container: #334b4f;
+  --md-sys-color-on-secondary-container: #cde7ec;
+  
+  --md-sys-color-background: #191c1d;
+  --md-sys-color-on-background: #e1e3e3;
+  --md-sys-color-surface: #191c1d;
+  --md-sys-color-on-surface: #e1e3e3;
+  --md-sys-color-surface-variant: #3f484a;
+  --md-sys-color-on-surface-variant: #bfc8ca;
+  --md-sys-color-outline: #899294;
+  
+  /* Glassmorphism overlays */
+  --glass-surface: rgba(25, 28, 29, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.1);
 }
 
 @theme inline {
