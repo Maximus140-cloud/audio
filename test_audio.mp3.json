@@ -1,0 +1,62 @@
+[
+  {
+    "part": "Hello, ",
+    "start": 100,
+    "end": 537
+  },
+  {
+    "part": "world! ",
+    "start": 787,
+    "end": 1275
+  },
+  {
+    "part": "This ",
+    "start": 2137,
+    "end": 2412
+  },
+  {
+    "part": "is ",
+    "start": 2425,
+    "end": 2537
+  },
+  {
+    "part": "a ",
+    "start": 2550,
+    "end": 2625
+  },
+  {
+    "part": "test. ",
+    "start": 2637,
+    "end": 3175
+  },
+  {
+    "part": "Let's ",
+    "start": 4037,
+    "end": 4387
+  },
+  {
+    "part": "see ",
+    "start": 4400,
+    "end": 4550
+  },
+  {
+    "part": "how ",
+    "start": 4562,
+    "end": 4750
+  },
+  {
+    "part": "it ",
+    "start": 4762,
+    "end": 4825
+  },
+  {
+    "part": "highlights ",
+    "start": 4837,
+    "end": 5337
+  },
+  {
+    "part": "spaces.",
+    "start": 5350,
+    "end": 6037
+  }
+]

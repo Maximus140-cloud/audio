@@ -3,15 +3,27 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --webpack",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "postinstall": "patch-package"
   },
   "dependencies": {
+    "@microsoft/fetch-event-source": "^2.0.1",
+    "@tanstack/react-virtual": "^3.14.3",
+    "epub2": "^3.0.2",
+    "framer-motion": "^12.41.0",
+    "html-to-text": "^10.0.0",
+    "idb": "^8.0.3",
+    "lucide-react": "^1.21.0",
     "next": "16.2.9",
+    "next-pwa": "^5.6.0",
+    "node-edge-tts": "^1.2.10",
+    "pdf-parse": "^1.1.1",
     "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "react-dom": "19.2.4",
+    "react-hot-toast": "^2.6.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
@@ -20,6 +32,8 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.9",
+    "patch-package": "^8.0.1",
+    "postinstall-postinstall": "^2.1.0",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
