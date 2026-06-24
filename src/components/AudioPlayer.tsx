@@ -34,7 +34,7 @@ export default function AudioPlayer({
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const scrollParentRef = useRef<HTMLDivElement>(null);
   
-  const audioCache = useRef<{ [index: number]: Promise<string | null> }>({});
+  const audioCache = useRef<{ [index: number]: Promise<string | null> | undefined }>({});
   const subtitlesCache = useRef<{ [index: number]: any[] }>({});
   const [currentTime, setCurrentTime] = useState(0);
 
