@@ -371,13 +371,14 @@ export default function Home() {
         }
 
         completed++;
+        console.log(`Chunk ${i} completed downloading.`);
         const progress = (completed / book.chunks.length) * 100;
         setDownloadProgress((prev) => ({ ...prev, [book.id]: progress }));
         toast.loading(`Downloading ${book.title}... ${Math.round(progress)}%`, { id: `download-${book.id}` });
         
       };
 
-      const CONCURRENCY = 20; // Lowered to 20 to avoid Vercel 10-second 504 timeouts
+      const CONCURRENCY = 100; // Increased to 100 as requested
       for (let i = 0; i < book.chunks.length; i += CONCURRENCY) {
         if (hasError) break;
         const batch = [];
@@ -415,6 +416,7 @@ export default function Home() {
             await subWritable.write(JSON.stringify(data.subtitles));
             await subWritable.close();
           }
+          console.log(`Chunk ${i} completed downloading.`);
         } catch (e) {
           console.error(`DLQ Chunk ${i} permanently failed after split fallback:`, e);
           toast.error(`Chunk ${i} completely failed and was skipped.`, { duration: 8000, icon: '⚠️' });
@@ -460,8 +462,8 @@ export default function Home() {
   };
 
   return (
-    <main className="flex flex-col min-h-screen px-4 py-8 max-w-5xl mx-auto w-full">
-      <header className="flex items-center justify-between mb-12">
+    <main className={`flex flex-col w-full ${!currentBook ? 'min-h-screen px-4 py-8 max-w-7xl mx-auto' : 'h-[100dvh] overflow-hidden'}`}>
+      <header className={`flex-none flex items-center justify-between ${!currentBook ? 'mb-12' : 'p-4 md:px-8'}`}>
         <div className="flex items-center gap-3 text-primary cursor-pointer" onClick={() => setCurrentBook(null)}>
           {currentBook ? <ArrowLeft size={32} /> : <BookOpen size={32} />}
           <h1 className="text-3xl font-bold tracking-tight">Audiobook</h1>
@@ -483,7 +485,7 @@ export default function Home() {
         </div>
       </header>
 
-      <div className="flex-1 flex flex-col w-full">
+      <div className="flex-1 flex flex-col w-full min-h-0">
         {!currentBook ? (
           <div className="w-full flex flex-col gap-12">
             <div className="w-full animate-fade-in text-center">
@@ -505,7 +507,7 @@ export default function Home() {
             />
           </div>
         ) : (
-          <div className="w-full animate-slide-up">
+          <div className="w-full h-full overflow-hidden flex flex-col min-h-0">
             <AudioPlayer 
               book={currentBook}
               onSaveProgress={handleSaveProgress}

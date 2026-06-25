@@ -288,21 +288,21 @@ export default function AudioPlayer({
   const progressPercentage = ((currentIndex + 1) / book.chunks.length) * 100;
 
   return (
-    <div className="relative flex w-full max-w-5xl mx-auto my-8 gap-6 h-[80vh]">
+    <div className="relative flex w-full h-full">
       
-      {/* Sidebar Backdrop (Mobile Only) */}
+      {/* Sidebar Backdrop */}
       {isSidebarOpen && (
         <div 
-          className="absolute inset-0 z-10 bg-black/50 backdrop-blur-sm lg:hidden rounded-3xl"
+          className="absolute inset-0 z-20 bg-black/50 backdrop-blur-sm"
           onClick={() => setIsSidebarOpen(false)}
         />
       )}
       
       {/* TOC & Bookmarks Sidebar */}
-      <div className={`absolute lg:relative z-20 flex-shrink-0 w-4/5 max-w-[320px] lg:w-80 h-full bg-surface glass-panel lg:rounded-3xl p-6 overflow-y-auto shadow-2xl lg:shadow-none transition-transform duration-300 left-0 top-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
+      <div className={`absolute z-30 flex-shrink-0 w-80 max-w-[80vw] h-full bg-surface glass-panel p-6 overflow-y-auto shadow-2xl transition-transform duration-300 left-0 top-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-bold text-on-surface">Contents</h2>
-          <button onClick={() => setIsSidebarOpen(false)} className="lg:hidden p-2 text-on-surface-variant">
+          <button onClick={() => setIsSidebarOpen(false)} className="p-2 text-on-surface-variant hover:bg-surface-variant rounded-full">
             <X size={20} />
           </button>
         </div>
@@ -349,7 +349,7 @@ export default function AudioPlayer({
       </div>
 
       {/* Main Player Area */}
-      <div className="flex-1 flex flex-col h-full glass-panel rounded-3xl p-4 md:p-8 shadow-xl overflow-hidden relative">
+      <div className="flex-1 flex flex-col h-full p-4 md:p-6 lg:px-12 overflow-hidden relative min-h-0">
         <audio 
           ref={audioRef} 
           onEnded={handleEnded} 
@@ -360,7 +360,7 @@ export default function AudioPlayer({
         
         {/* Header Options */}
         <div className="flex justify-between items-center mb-6">
-          <button onClick={() => setIsSidebarOpen(true)} className="lg:hidden p-2 text-on-surface-variant hover:bg-surface-variant rounded-full">
+          <button onClick={() => setIsSidebarOpen(true)} className="p-2 text-on-surface-variant hover:bg-surface-variant rounded-full">
             <Menu size={24} />
           </button>
           
@@ -384,7 +384,7 @@ export default function AudioPlayer({
 
         {/* Reader View (Virtualized) */}
         <div 
-          className="flex-1 bg-surface-variant/20 rounded-2xl p-4 md:p-8 mb-6 overflow-y-auto"
+          className="flex-1 mb-6 overflow-y-auto px-2 md:px-4"
           ref={scrollParentRef}
         >
           <div
