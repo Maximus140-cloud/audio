@@ -10,6 +10,117 @@ import { AudiobookData } from "@/types";
 import { getAllBooks, saveBook, deleteBook, getSetting, saveSetting } from "@/lib/db";
 import toast from "react-hot-toast";
 
+const sanitizeText = (text: string) => {
+  return text
+    .replace(/[\u200B-\u200D\uFEFF]/g, '') // Zero-width spaces
+    .replace(/[\u{1F600}-\u{1F64F}]/gu, '') // Emoticons
+    .replace(/[\u{1F300}-\u{1F5FF}]/gu, '') // Misc Symbols and Pictographs
+    .replace(/[\u{1F680}-\u{1F6FF}]/gu, '') // Transport and Map
+    .replace(/[\u{1F700}-\u{1F77F}]/gu, '') // Alchemical Symbols
+    .replace(/[\u{1F780}-\u{1F7FF}]/gu, '') // Geometric Shapes Extended
+    .replace(/[\u{1F800}-\u{1F8FF}]/gu, '') // Supplemental Arrows-C
+    .replace(/[\u{1F900}-\u{1F9FF}]/gu, '') // Supplemental Symbols and Pictographs
+    .replace(/[\u{1FA00}-\u{1FA6F}]/gu, '') // Chess Symbols
+    .replace(/[\u{1FA70}-\u{1FAFF}]/gu, '') // Symbols and Pictographs Extended-A
+    .replace(/[\u2702-\u27B0]/gu, '') // Dingbats
+    .replace(/\.{4,}/g, '...') // excessive periods
+    .replace(/-{3,}/g, '--'); // excessive dashes
+};
+
+const fetchTTSWithSplitFallback = async (
+  text: string, 
+  chunkIndex: number, 
+  voiceSettings: any, 
+  level: number = 0
+): Promise<{audioBase64: string, subtitles: any[]}> => {
+  const bodyPayload: any = { 
+    text: sanitizeText(text),
+    chunkIndex 
+  };
+  if (voiceSettings) {
+    bodyPayload.voice = voiceSettings.voice;
+    bodyPayload.rate = voiceSettings.rate;
+    bodyPayload.pitch = voiceSettings.pitch;
+  }
+
+  let retries = 5;
+  let data = null;
+  
+  while (retries > 0) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 60000);
+    try {
+      const response = await fetch("/api/tts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(bodyPayload),
+        signal: controller.signal
+      });
+      
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.error || "TTS API failed");
+      }
+      data = await response.json();
+      break;
+    } catch (e: any) {
+      retries--;
+      if (retries === 0) {
+        if (level >= 3) {
+          throw new Error("Max split depth reached");
+        }
+        
+        // Binary search split
+        const midpoint = Math.floor(text.length / 2);
+        let splitIndex = text.lastIndexOf(' ', midpoint);
+        if (splitIndex === -1) splitIndex = midpoint;
+        
+        const part1Text = text.substring(0, splitIndex);
+        const part2Text = text.substring(splitIndex);
+        
+        const part1 = await fetchTTSWithSplitFallback(part1Text, chunkIndex, voiceSettings, level + 1);
+        const part2 = await fetchTTSWithSplitFallback(part2Text, chunkIndex, voiceSettings, level + 1);
+        
+        // Concatenate audio buffers
+        const audio1 = Uint8Array.from(atob(part1.audioBase64), c => c.charCodeAt(0));
+        const audio2 = Uint8Array.from(atob(part2.audioBase64), c => c.charCodeAt(0));
+        const mergedAudio = new Uint8Array(audio1.length + audio2.length);
+        mergedAudio.set(audio1);
+        mergedAudio.set(audio2, audio1.length);
+        
+        // Use an efficient method to convert back to base64 avoiding stack overflow
+        let binaryStr = "";
+        const chunkSize = 8192;
+        for (let i = 0; i < mergedAudio.length; i += chunkSize) {
+          binaryStr += String.fromCharCode.apply(null, Array.from(mergedAudio.subarray(i, i + chunkSize)));
+        }
+        const mergedBase64 = btoa(binaryStr);
+        
+        // Merge subtitles with offset
+        const subs1 = part1.subtitles || [];
+        const subs2 = part2.subtitles || [];
+        const lastSub = subs1[subs1.length - 1];
+        const offsetMs = lastSub ? lastSub.end : 0;
+        
+        const offsetSubs2 = subs2.map((s: any) => ({
+          ...s,
+          start: s.start + offsetMs,
+          end: s.end + offsetMs
+        }));
+        
+        return { audioBase64: mergedBase64, subtitles: [...subs1, ...offsetSubs2] };
+      }
+      const delay = 1000 * Math.pow(2, 5 - retries - 1); // Exponential backoff: 1s, 2s, 4s, 8s
+      await new Promise(res => setTimeout(res, delay));
+    } finally {
+      clearTimeout(timeoutId);
+    }
+  }
+  
+  if (!data) throw new Error("TTS failed after retries and no split fallback was successful.");
+  return data;
+};
+
 export default function Home() {
   const [books, setBooks] = useState<AudiobookData[]>([]);
   const [currentBook, setCurrentBook] = useState<AudiobookData | null>(null);
@@ -187,11 +298,12 @@ export default function Home() {
       
       let completed = 0;
       let hasError = false;
+      const failedChunks: number[] = [];
 
       const downloadChunk = async (i: number) => {
         if (hasError) return;
         const bodyPayload: any = { 
-          text: book.chunks[i].text,
+          text: sanitizeText(book.chunks[i].text),
           chunkIndex: i
         };
         if (settings) {
@@ -202,7 +314,6 @@ export default function Home() {
 
         let data = null;
         let retries = 5;
-        let backoff = 2000;
         while (retries > 0 && !hasError) {
           const controller = new AbortController();
           const timeoutId = setTimeout(() => controller.abort(), 60000); // 60s timeout for high concurrency
@@ -223,25 +334,20 @@ export default function Home() {
           } catch (e: any) {
             retries--;
             if (retries === 0) {
-              console.error(`Skipping chunk ${i} after 5 failed retries:`, e);
-              console.error(`Broken chunk text [Chunk ${i}]:\n`, book.chunks[i].text);
-              toast.error(`Chunk ${i} permanently failed and was skipped. Check console.`, { duration: 8000, icon: '⚠️' });
+              console.warn(`Chunk ${i} failed main download loop, adding to dead-letter queue.`);
+              failedChunks.push(i);
               hasError = false; // reset error state so we don't abort everything
               break; 
             }
-            await new Promise(res => setTimeout(res, 500)); // 0.5s delay for network stability
+            const delay = 1000 * Math.pow(2, 5 - retries - 1); // Exponential backoff: 1s, 2s, 4s, 8s
+            await new Promise(res => setTimeout(res, delay));
           } finally {
             clearTimeout(timeoutId);
           }
         }
 
         if (!data) {
-          // If we exhausted retries and data is still null, just skip this chunk
-          completed++;
-          const progress = (completed / book.chunks.length) * 100;
-          setDownloadProgress((prev) => ({ ...prev, [book.id]: progress }));
-          toast.loading(`Downloading ${book.title}... ${Math.round(progress)}%`, { id: `download-${book.id}` });
-          return; 
+          return; // Added to DLQ, skip file writing for now
         }
 
         const binaryString = atob(data.audioBase64);
@@ -283,6 +389,58 @@ export default function Home() {
         } catch (err) {
           hasError = true;
           throw err;
+        }
+      }
+      
+      const processDLQChunk = async (i: number) => {
+        try {
+          const data = await fetchTTSWithSplitFallback(book.chunks[i].text, i, settings);
+          
+          const binaryString = atob(data.audioBase64);
+          const len = binaryString.length;
+          const bytes = new Uint8Array(len);
+          for (let j = 0; j < len; j++) {
+            bytes[j] = binaryString.charCodeAt(j);
+          }
+          const blob = new Blob([bytes], { type: "audio/mpeg" });
+
+          const fileHandle = await bookDir.getFileHandle(`chunk_${i}.mp3`, { create: true });
+          const writable = await fileHandle.createWritable();
+          await writable.write(blob);
+          await writable.close();
+          
+          if (data.subtitles) {
+            const subHandle = await bookDir.getFileHandle(`chunk_${i}.json`, { create: true });
+            const subWritable = await subHandle.createWritable();
+            await subWritable.write(JSON.stringify(data.subtitles));
+            await subWritable.close();
+          }
+        } catch (e) {
+          console.error(`DLQ Chunk ${i} permanently failed after split fallback:`, e);
+          toast.error(`Chunk ${i} completely failed and was skipped.`, { duration: 8000, icon: '⚠️' });
+        } finally {
+          completed++;
+          const progress = (completed / book.chunks.length) * 100;
+          setDownloadProgress((prev) => ({ ...prev, [book.id]: progress }));
+          toast.loading(`Processing Retries ${book.title}... ${Math.round(progress)}%`, { id: `download-${book.id}` });
+        }
+      };
+
+      if (!hasError && failedChunks.length > 0) {
+        toast.loading(`Processing ${failedChunks.length} failed chunks...`, { id: `download-${book.id}` });
+        const DLQ_CONCURRENCY = 5;
+        for (let i = 0; i < failedChunks.length; i += DLQ_CONCURRENCY) {
+          if (hasError) break;
+          const batch = [];
+          for (let j = i; j < i + DLQ_CONCURRENCY && j < failedChunks.length; j++) {
+            batch.push(processDLQChunk(failedChunks[j]));
+          }
+          try {
+            await Promise.all(batch);
+          } catch (err) {
+            hasError = true;
+            throw err;
+          }
         }
       }
       
